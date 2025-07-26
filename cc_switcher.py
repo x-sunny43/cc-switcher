@@ -26,24 +26,33 @@ COLORS = {
 class ClaudeConfigSwitcher:
     def __init__(self):
         self.root = ctk.CTk()
-        
-        # Remove system title bar for complete control
-        self.root.overrideredirect(True)
+        # Configure window properties
         self.root.configure(fg_color=COLORS["bg_primary"])
+        self.root.title("cc switcher")
+        
+        # Keep system window but make it resizable and with proper taskbar behavior
+        self.root.resizable(True, True)
         
         # Set initial size
-        window_width = 800
-        window_height = 460  # Increased for custom title bar
+        window_width = 820
+        window_height = 400  # Reduced since we removed custom title bar
 
         # Get screen dimensions and center the window
+        # Update to get actual screen dimensions after window creation
+        self.root.update_idletasks()
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        center_x = int(screen_width / 2 - window_width / 2)
-        center_y = int(screen_height / 2 - window_height / 2)
+        center_x = int((screen_width - window_width) // 2)
+        center_y = int((screen_height - window_height) // 2)
         self.root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
-        # Variables for window dragging
-        self.drag_data = {"x": 0, "y": 0}
+        # Try to minimize system decorations while keeping taskbar functionality
+        try:
+            # These attributes help on different platforms
+            self.root.attributes('-alpha', 1.0)  # Ensure full opacity
+        except Exception:
+            pass
+
 
         self.claude_dir = Path.home() / ".claude"
         self.settings_file = self.claude_dir / "settings.json"
@@ -58,71 +67,11 @@ class ClaudeConfigSwitcher:
         # Use after_idle to ensure UI is ready before refreshing
         self.root.after_idle(self.refresh_config_list)
 
+
     def setup_ui(self):
-        # --- Custom Title Bar ---
-        self.title_bar = ctk.CTkFrame(self.root, height=30, corner_radius=0, fg_color=COLORS["bg_secondary"])
-        self.title_bar.pack(fill="x", pady=0, padx=0)
-        self.title_bar.pack_propagate(False)
-        
-        # Title
-        title_label = ctk.CTkLabel(
-            self.title_bar, 
-            text="Claude Config Switcher",
-            font=ctk.CTkFont(size=13, weight="bold"),
-            text_color=COLORS["text_primary"]
-        )
-        title_label.pack(side="left", padx=10, pady=5)
-        
-        # Window controls
-        controls_frame = ctk.CTkFrame(self.title_bar, fg_color="transparent")
-        controls_frame.pack(side="right", padx=5, pady=2)
-        
-        # Close button
-        close_btn = ctk.CTkButton(
-            controls_frame,
-            text="✕",
-            width=25,
-            height=25,
-            corner_radius=0,
-            fg_color="transparent",
-            hover_color=COLORS["accent_red"],
-            text_color=COLORS["text_secondary"],
-            command=self.root.quit
-        )
-        close_btn.pack(side="right", padx=1)
-        
-        # Minimize button
-        minimize_btn = ctk.CTkButton(
-            controls_frame,
-            text="−",
-            width=25,
-            height=25,
-            corner_radius=0,
-            fg_color="transparent",
-            hover_color=COLORS["bg_tertiary"],
-            text_color=COLORS["text_secondary"],
-            command=self.minimize_window
-        )
-        minimize_btn.pack(side="right", padx=1)
-        
-        # Bind drag events to title bar - simplified approach
-        def start_drag(event):
-            self.drag_data["x"] = event.x_root - self.root.winfo_x()
-            self.drag_data["y"] = event.y_root - self.root.winfo_y()
-
-        def on_drag(event):
-            x = event.x_root - self.drag_data["x"]
-            y = event.y_root - self.drag_data["y"]
-            self.root.geometry(f"+{x}+{y}")
-
-        self.title_bar.bind("<Button-1>", start_drag)
-        self.title_bar.bind("<B1-Motion>", on_drag)
-        title_label.bind("<Button-1>", start_drag)
-        title_label.bind("<B1-Motion>", on_drag)
-        
         # --- Main Content Area ---
         content_frame = ctk.CTkFrame(self.root, fg_color="transparent")
-        content_frame.pack(fill="both", expand=True, padx=10, pady=(5, 10))
+        content_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         # --- Left Panel ---
         self.left_panel = ctk.CTkFrame(content_frame, width=240, corner_radius=0, fg_color=COLORS["bg_secondary"])
@@ -192,7 +141,7 @@ class ClaudeConfigSwitcher:
         self.preview_textbox = ctk.CTkTextbox(
             self.right_panel,
             corner_radius=0,
-            font=ctk.CTkFont(family="Consolas", size=11),
+            font=ctk.CTkFont(family="Consolas", size=12),
             wrap="none",
             fg_color=COLORS["bg_tertiary"],
             text_color=COLORS["text_primary"],
@@ -201,9 +150,6 @@ class ClaudeConfigSwitcher:
         self.preview_textbox.pack(fill="both", expand=True)
 
         self.selected_config = None
-
-    def minimize_window(self):
-        self.root.iconify()
 
     def create_config_button(self, config_file, settings_content):
         frame = ctk.CTkFrame(
