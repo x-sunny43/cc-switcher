@@ -129,7 +129,9 @@ class ClaudeConfigSwitcher:
             corner_radius=0,
             fg_color=COLORS["bg_tertiary"],
             hover_color=COLORS["card_hover"],
-            text_color=COLORS["text_primary"]
+            text_color=COLORS["text_primary"],
+            border_width=1,
+            border_color=COLORS["border"]
         )
         self.switch_btn.pack(pady=(0, 4), padx=0, fill="x")
 
@@ -146,7 +148,9 @@ class ClaudeConfigSwitcher:
             fg_color=COLORS["bg_tertiary"],
             hover_color=COLORS["card_hover"],
             text_color=COLORS["text_primary"],
-            font=ctk.CTkFont(family="Segoe UI", size=13)
+            font=ctk.CTkFont(family="Segoe UI", size=13),
+            border_width=1,
+            border_color=COLORS["border"]
         )
         self.refresh_btn.pack(side="left", fill="x", expand=True, padx=(0, 2))
 
@@ -159,7 +163,9 @@ class ClaudeConfigSwitcher:
             fg_color=COLORS["bg_tertiary"],
             hover_color=COLORS["card_hover"],
             text_color=COLORS["text_primary"],
-            font=ctk.CTkFont(family="Segoe UI", size=13)
+            font=ctk.CTkFont(family="Segoe UI", size=13),
+            border_width=1,
+            border_color=COLORS["border"]
         )
         self.open_dir_btn.pack(side="right", fill="x", expand=True, padx=(2, 0))
 
@@ -258,7 +264,7 @@ class ClaudeConfigSwitcher:
         card._config_file = config_file
         card._is_selected = False
         
-        # Bind click events
+        # Bind click and hover events to all components
         def on_click(e):
             self.select_config(config_file)
         
@@ -270,11 +276,15 @@ class ClaudeConfigSwitcher:
             if not card._is_selected:
                 card.configure(fg_color=COLORS["bg_tertiary"])
         
-        card.bind("<Button-1>", on_click)
-        card.bind("<Enter>", on_enter)
-        card.bind("<Leave>", on_leave)
-        content_frame.bind("<Button-1>", on_click)
-        name_label.bind("<Button-1>", on_click)
+        # Bind events to all widgets to prevent flickering
+        widgets_to_bind = [card, content_frame, name_label]
+        if 'status_label' in locals():
+            widgets_to_bind.append(status_label)
+            
+        for widget in widgets_to_bind:
+            widget.bind("<Button-1>", on_click)
+            widget.bind("<Enter>", on_enter)
+            widget.bind("<Leave>", on_leave)
 
     def select_config(self, config_file):
         self.selected_config = config_file
