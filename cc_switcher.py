@@ -39,8 +39,8 @@ class ClaudeConfigSwitcher:
         self.root.resizable(True, True)
         
         # Set initial size
-        window_width = 820
-        window_height = 400  # Reduced since we removed custom title bar
+        window_width = 860
+        window_height = 430  # Reduced since we removed custom title bar
 
         # Get screen dimensions and center the window
         # Update to get actual screen dimensions after window creation
@@ -113,7 +113,7 @@ class ClaudeConfigSwitcher:
         self.status_label = ctk.CTkLabel(
             bottom_container, 
             text="", 
-            font=ctk.CTkFont(size=11), 
+            font=ctk.CTkFont(family="Segoe UI", size=14), 
             height=20,
             text_color=COLORS["text_muted"]
         )
@@ -124,8 +124,8 @@ class ClaudeConfigSwitcher:
             bottom_container,
             text="Switch Config",
             command=self.switch_config,
-            height=28,
-            font=ctk.CTkFont(size=12, weight="bold"),
+            height=30,
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
             corner_radius=0,
             fg_color=COLORS["bg_tertiary"],
             hover_color=COLORS["card_hover"],
@@ -141,12 +141,12 @@ class ClaudeConfigSwitcher:
             button_row,
             text="Refresh",
             command=self.refresh_config_list,
-            height=28,
+            height=30,
             corner_radius=0,
             fg_color=COLORS["bg_tertiary"],
             hover_color=COLORS["card_hover"],
             text_color=COLORS["text_primary"],
-            font=ctk.CTkFont(size=12)
+            font=ctk.CTkFont(family="Segoe UI", size=13)
         )
         self.refresh_btn.pack(side="left", fill="x", expand=True, padx=(0, 2))
 
@@ -154,12 +154,12 @@ class ClaudeConfigSwitcher:
             button_row,
             text="Open",
             command=self.open_config_directory,
-            height=28,
+            height=30,
             corner_radius=0,
             fg_color=COLORS["bg_tertiary"],
             hover_color=COLORS["card_hover"],
             text_color=COLORS["text_primary"],
-            font=ctk.CTkFont(size=12)
+            font=ctk.CTkFont(family="Segoe UI", size=13)
         )
         self.open_dir_btn.pack(side="right", fill="x", expand=True, padx=(2, 0))
 
@@ -167,12 +167,11 @@ class ClaudeConfigSwitcher:
         list_container = ctk.CTkFrame(self.left_panel, fg_color="transparent")
         list_container.pack(fill="both", expand=True, padx=8, pady=8)
         
-        self.config_listbox = ctk.CTkScrollableFrame(
+        # Use a regular frame for the config list to avoid always-visible scrollbar
+        self.config_listbox = ctk.CTkFrame(
             list_container, 
             corner_radius=0, 
-            fg_color="transparent",
-            scrollbar_button_color=COLORS["bg_tertiary"],
-            scrollbar_button_hover_color=COLORS["card_hover"]
+            fg_color="transparent"
         )
         self.config_listbox.pack(fill="both", expand=True)
 
@@ -187,8 +186,8 @@ class ClaudeConfigSwitcher:
         self.preview_textbox = ctk.CTkTextbox(
             preview_container,
             corner_radius=0,
-            font=ctk.CTkFont(family="JetBrains Mono", size=11),
-            wrap="none",
+            font=ctk.CTkFont(family="Segoe UI", size=13),
+            wrap="word",
             fg_color=COLORS["bg_tertiary"],
             text_color=COLORS["text_primary"],
             border_width=1,
@@ -202,7 +201,7 @@ class ClaudeConfigSwitcher:
         # Card container with modern styling
         card = ctk.CTkFrame(
             self.config_listbox,
-            height=24,
+            height=30,
             corner_radius=0,
             fg_color=COLORS["bg_tertiary"],
             border_width=1,
@@ -219,7 +218,7 @@ class ClaudeConfigSwitcher:
         name_label = ctk.CTkLabel(
             content_frame,
             text=config_file.name,
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=13),
             anchor="w",
             text_color=COLORS["text_primary"]
         )
@@ -242,7 +241,7 @@ class ClaudeConfigSwitcher:
             status_label = ctk.CTkLabel(
                 content_frame,
                 text="●",
-                font=ctk.CTkFont(size=14, weight="bold"),
+                font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
                 text_color=COLORS["accent_red"]
             )
             status_label.pack(side="right", padx=(6, 0))
@@ -250,7 +249,7 @@ class ClaudeConfigSwitcher:
             status_label = ctk.CTkLabel(
                 content_frame,
                 text="●",
-                font=ctk.CTkFont(size=14, weight="bold"),
+                font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
                 text_color=COLORS["success_green"]
             )
             status_label.pack(side="right", padx=(6, 0))
@@ -287,8 +286,8 @@ class ClaudeConfigSwitcher:
         for child in self.config_listbox.winfo_children():
             if hasattr(child, '_config_file'):
                 if child._config_file.name == config_file.name:
-                    # Selected card
-                    child.configure(fg_color=COLORS["accent_primary"])
+                    # Selected card - no border for clean look
+                    child.configure(fg_color=COLORS["accent_primary"], border_width=0)
                     child._is_selected = True
                     # Update text color for better contrast on blue background
                     for widget in child.winfo_children():
@@ -297,8 +296,8 @@ class ClaudeConfigSwitcher:
                                 if isinstance(label, ctk.CTkLabel) and "settings" in label.cget("text"):
                                     label.configure(text_color="white")
                 else:
-                    # Unselected cards
-                    child.configure(fg_color=COLORS["bg_tertiary"])
+                    # Unselected cards - restore border
+                    child.configure(fg_color=COLORS["bg_tertiary"], border_width=1, border_color=COLORS["border"])
                     child._is_selected = False
                     # Restore original text color
                     for widget in child.winfo_children():
