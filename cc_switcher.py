@@ -281,13 +281,15 @@ class ClaudeConfigSwitcher:
 
     def refresh_config_list(self):
         try:
+            # Remember current selection
+            current_selection = self.selected_config
+            
             # Clear existing list
             for widget in self.config_listbox.winfo_children():
                 widget.destroy()
 
             self.config_files = []
             self.selected_config = None
-            self.preview_textbox.delete("1.0", "end")
 
             if not self.claude_dir.exists():
                 self.update_status("Directory not found", COLORS["accent_red"])
@@ -321,9 +323,13 @@ class ClaudeConfigSwitcher:
             for config_file in self.config_files:
                 self.create_config_button(config_file, settings_content)
 
-            # Default selection and preview to settings.json
-            if settings_file_path:
-                self.select_config(settings_file_path)
+            # Restore selection if the file still exists, otherwise keep no selection
+            if current_selection and current_selection.exists():
+                # Find the corresponding file in the new list
+                for config_file in self.config_files:
+                    if config_file.name == current_selection.name:
+                        self.select_config(config_file)
+                        break
                 
         except Exception as e:
             self.update_status(f"Error loading configs: {str(e)}", COLORS["accent_red"])
