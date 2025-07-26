@@ -328,12 +328,105 @@ class ClaudeConfigSwitcher:
                 try:
                     json_data = json.loads(content)
                     formatted_content = json.dumps(json_data, indent=2, ensure_ascii=False)
-                    self.preview_textbox.insert("1.0", formatted_content)
+                    self.insert_json_with_highlighting(formatted_content)
                 except json.JSONDecodeError:
                     self.preview_textbox.insert("1.0", content)
 
         except Exception:
             self.update_status("Error reading file", COLORS["accent_red"])
+
+    def insert_json_with_highlighting(self, json_content):
+        """Insert JSON content with syntax highlighting"""
+        import re
+        
+        # Define color scheme for JSON syntax highlighting
+        colors = {
+            "string": "#ce9178",      # Orange for strings
+            "number": "#b5cea8",      # Light green for numbers
+            "boolean": "#569cd6",     # Blue for booleans
+            "null": "#569cd6",        # Blue for null
+            "key": "#9cdcfe",         # Light blue for keys
+            "brace": "#ffd700",       # Gold for braces
+            "bracket": "#ffd700",     # Gold for brackets
+            "colon": "#ffffff",       # White for colons
+            "comma": "#ffffff"        # White for commas
+        }
+        
+        # Configure text tags for highlighting
+        for tag, color in colors.items():
+            self.preview_textbox.tag_config(tag, foreground=color)
+        
+        # Insert the content
+        self.preview_textbox.insert("1.0", json_content)
+        
+        # Apply highlighting using regex patterns
+        content = json_content
+        
+        # Keep track of string positions to avoid re-highlighting them
+        string_ranges = []
+        
+        # First pass: Highlight strings (including keys and values)
+        for match in re.finditer(r'"([^"\\\\]|\\\\.)*"', content):
+            start_idx = f"1.0+{match.start()}c"
+            end_idx = f"1.0+{match.end()}c"
+            string_ranges.append((match.start(), match.end()))
+            
+            # Check if this string is a key (followed by colon)
+            rest_content = content[match.end():].lstrip()
+            if rest_content.startswith(':'):
+                self.preview_textbox.tag_add("key", start_idx, end_idx)
+            else:
+                self.preview_textbox.tag_add("string", start_idx, end_idx)
+        
+        # Helper function to check if position is inside a string
+        def is_in_string(pos):
+            for start, end in string_ranges:
+                if start <= pos < end:
+                    return True
+            return False
+        
+        # Highlight numbers (only outside strings)
+        for match in re.finditer(r'-?\d+\.?\d*([eE][+-]?\d+)?', content):
+            if not is_in_string(match.start()):
+                start_idx = f"1.0+{match.start()}c"
+                end_idx = f"1.0+{match.end()}c"
+                self.preview_textbox.tag_add("number", start_idx, end_idx)
+        
+        # Highlight booleans and null (only outside strings)
+        for match in re.finditer(r'\b(true|false|null)\b', content):
+            if not is_in_string(match.start()):
+                start_idx = f"1.0+{match.start()}c"
+                end_idx = f"1.0+{match.end()}c"
+                if match.group(1) in ['true', 'false']:
+                    self.preview_textbox.tag_add("boolean", start_idx, end_idx)
+                else:
+                    self.preview_textbox.tag_add("null", start_idx, end_idx)
+        
+        # Highlight braces and brackets (only outside strings)
+        for match in re.finditer(r'[{}]', content):
+            if not is_in_string(match.start()):
+                start_idx = f"1.0+{match.start()}c"
+                end_idx = f"1.0+{match.end()}c"
+                self.preview_textbox.tag_add("brace", start_idx, end_idx)
+            
+        for match in re.finditer(r'[\[\]]', content):
+            if not is_in_string(match.start()):
+                start_idx = f"1.0+{match.start()}c"
+                end_idx = f"1.0+{match.end()}c"
+                self.preview_textbox.tag_add("bracket", start_idx, end_idx)
+        
+        # Highlight colons and commas (only outside strings)
+        for match in re.finditer(r':', content):
+            if not is_in_string(match.start()):
+                start_idx = f"1.0+{match.start()}c"
+                end_idx = f"1.0+{match.end()}c"
+                self.preview_textbox.tag_add("colon", start_idx, end_idx)
+            
+        for match in re.finditer(r',', content):
+            if not is_in_string(match.start()):
+                start_idx = f"1.0+{match.start()}c"
+                end_idx = f"1.0+{match.end()}c"
+                self.preview_textbox.tag_add("comma", start_idx, end_idx)
 
     def switch_config(self):
         if not self.selected_config:
