@@ -343,14 +343,21 @@ class ClaudeConfigSwitcher:
                 except (json.JSONDecodeError, IOError):
                     settings_content = None  # Mark as not readable
 
-            # Scan for config files and sort them with settings.json on top
+            # Scan for settings-related config files and sort them with settings.json on top
             other_files = []
             settings_file_path = None
             for file_path in self.claude_dir.glob("*.json"):
-                if file_path.name == "settings.json":
-                    settings_file_path = file_path
-                else:
-                    other_files.append(file_path)
+                file_name = file_path.name.lower()
+                # Filter to only include settings-related files
+                if (file_name == "settings.json" or 
+                    "settings" in file_name or 
+                    file_name.startswith("settings_") or
+                    file_name.endswith("_settings.json")):
+                    
+                    if file_path.name == "settings.json":
+                        settings_file_path = file_path
+                    else:
+                        other_files.append(file_path)
 
             other_files.sort()
 
