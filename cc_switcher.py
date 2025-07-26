@@ -8,20 +8,23 @@ from datetime import datetime
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
-# Refined color scheme - Professional Black, White, Gray, Red
+# Modern card-style color scheme
 COLORS = {
-    "bg_primary": "#2a2a2a",      # Warm deep gray - main background
-    "bg_secondary": "#353535",    # Subtle lifted gray - panels
-    "bg_tertiary": "#404040",     # Clear contrast gray - elements
-    "border": "#4a4a4a",          # Fine divider gray - borders
-    "text_primary": "#f5f5f5",    # Soft white - main text
-    "text_secondary": "#c8c8c8",  # Elegant gray - secondary text
-    "text_muted": "#999999",      # Understated gray - muted text
-    "accent_red": "#e74c3c",      # Classic warm red - active/important
-    "accent_red_hover": "#c0392b", # Deep red - hover state
-    "success_green": "#27ae60",   # Balanced green - success status
-    "button_bg": "#4a4a4a",       # Button background - lighter than tertiary
-    "button_hover": "#5a5a5a"     # Button hover - even lighter
+    "bg_primary": "#1a1a1a",      # Dark background
+    "bg_secondary": "#2b2b2b",    # Card background
+    "bg_tertiary": "#333333",     # Elevated card background
+    "card_hover": "#3a3a3a",      # Card hover state
+    "border": "#404040",  # Subtle border
+    "shadow": "#000000",   # Card shadow
+    "text_primary": "#ffffff",    # Primary text
+    "text_secondary": "#b3b3b3",  # Secondary text
+    "text_muted": "#666666",      # Muted text
+    "accent_primary": "#007acc",  # Primary accent (blue)
+    "accent_hover": "#005a9e",    # Primary accent hover
+    "accent_red": "#ff6b6b",      # Error/active state
+    "accent_red_hover": "#ff5252", # Error hover
+    "success_green": "#4caf50",   # Success state
+    "warning_orange": "#ff9800"   # Warning state
 }
 
 
@@ -95,80 +98,100 @@ class ClaudeConfigSwitcher:
     def setup_ui(self):
         # --- Main Content Area ---
         content_frame = ctk.CTkFrame(self.root, fg_color="transparent")
-        content_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        content_frame.pack(fill="both", expand=True, padx=3, pady=3)
 
         # --- Left Panel ---
-        self.left_panel = ctk.CTkFrame(content_frame, width=240, corner_radius=0, fg_color=COLORS["bg_secondary"])
-        self.left_panel.pack(side="left", fill="y", pady=0, padx=0)
+        self.left_panel = ctk.CTkFrame(content_frame, width=260, corner_radius=0, fg_color=COLORS["bg_secondary"])
+        self.left_panel.pack(side="left", fill="y", pady=0, padx=(0, 2))
         self.left_panel.pack_propagate(False)
 
         # --- Bottom Controls Container ---
         bottom_container = ctk.CTkFrame(self.left_panel, fg_color="transparent")
-        bottom_container.pack(side="bottom", fill="x", padx=0, pady=(5, 0))
+        bottom_container.pack(side="bottom", fill="x", padx=8, pady=(4, 8))
 
         # --- Status Label ---
         self.status_label = ctk.CTkLabel(
             bottom_container, 
             text="", 
-            font=ctk.CTkFont(size=12), 
-            height=28,
-            text_color=COLORS["text_secondary"]
+            font=ctk.CTkFont(size=11), 
+            height=20,
+            text_color=COLORS["text_muted"]
         )
-        self.status_label.pack(pady=2, padx=0, fill="x")
+        self.status_label.pack(pady=(0, 4), padx=0, fill="x")
 
         # --- Action Buttons ---
         self.switch_btn = ctk.CTkButton(
             bottom_container,
-            text="Switch",
+            text="Switch Config",
             command=self.switch_config,
-            height=30,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            height=28,
+            font=ctk.CTkFont(size=12, weight="bold"),
             corner_radius=0,
-            fg_color=COLORS["button_bg"],
-            hover_color=COLORS["accent_red"],
+            fg_color=COLORS["bg_tertiary"],
+            hover_color=COLORS["card_hover"],
             text_color=COLORS["text_primary"]
         )
-        self.switch_btn.pack(pady=2, padx=0, fill="x")
+        self.switch_btn.pack(pady=(0, 4), padx=0, fill="x")
+
+        # Button row for secondary actions
+        button_row = ctk.CTkFrame(bottom_container, fg_color="transparent")
+        button_row.pack(fill="x", pady=0)
 
         self.refresh_btn = ctk.CTkButton(
-            bottom_container,
+            button_row,
             text="Refresh",
             command=self.refresh_config_list,
-            height=30,
+            height=28,
             corner_radius=0,
-            fg_color=COLORS["button_bg"],
-            hover_color=COLORS["button_hover"],
-            text_color=COLORS["text_primary"]
+            fg_color=COLORS["bg_tertiary"],
+            hover_color=COLORS["card_hover"],
+            text_color=COLORS["text_primary"],
+            font=ctk.CTkFont(size=12)
         )
-        self.refresh_btn.pack(pady=2, padx=0, fill="x")
+        self.refresh_btn.pack(side="left", fill="x", expand=True, padx=(0, 2))
 
         self.open_dir_btn = ctk.CTkButton(
-            bottom_container,
+            button_row,
             text="Open",
             command=self.open_config_directory,
-            height=30,
+            height=28,
             corner_radius=0,
-            fg_color=COLORS["button_bg"],
-            hover_color=COLORS["button_hover"],
-            text_color=COLORS["text_primary"]
+            fg_color=COLORS["bg_tertiary"],
+            hover_color=COLORS["card_hover"],
+            text_color=COLORS["text_primary"],
+            font=ctk.CTkFont(size=12)
         )
-        self.open_dir_btn.pack(pady=(2, 0), padx=0, fill="x")
+        self.open_dir_btn.pack(side="right", fill="x", expand=True, padx=(2, 0))
 
         # --- Config List (takes all remaining space) ---
-        self.config_listbox = ctk.CTkFrame(self.left_panel, corner_radius=0, fg_color="transparent")
-        self.config_listbox.pack(fill="both", expand=True, padx=0, pady=0)
+        list_container = ctk.CTkFrame(self.left_panel, fg_color="transparent")
+        list_container.pack(fill="both", expand=True, padx=8, pady=8)
+        
+        self.config_listbox = ctk.CTkScrollableFrame(
+            list_container, 
+            corner_radius=0, 
+            fg_color="transparent",
+            scrollbar_button_color=COLORS["bg_tertiary"],
+            scrollbar_button_hover_color=COLORS["card_hover"]
+        )
+        self.config_listbox.pack(fill="both", expand=True)
 
         # --- Right Panel (Preview) ---
         self.right_panel = ctk.CTkFrame(content_frame, corner_radius=0, fg_color=COLORS["bg_secondary"])
-        self.right_panel.pack(side="left", fill="both", expand=True, padx=(5, 0), pady=0)
+        self.right_panel.pack(side="left", fill="both", expand=True, padx=(2, 0), pady=0)
 
+        # Preview content
+        preview_container = ctk.CTkFrame(self.right_panel, fg_color="transparent")
+        preview_container.pack(fill="both", expand=True, padx=8, pady=8)
+        
         self.preview_textbox = ctk.CTkTextbox(
-            self.right_panel,
+            preview_container,
             corner_radius=0,
-            font=ctk.CTkFont(family="Consolas", size=12),
+            font=ctk.CTkFont(family="JetBrains Mono", size=11),
             wrap="none",
             fg_color=COLORS["bg_tertiary"],
             text_color=COLORS["text_primary"],
+            border_width=1,
             border_color=COLORS["border"]
         )
         self.preview_textbox.pack(fill="both", expand=True)
@@ -176,26 +199,33 @@ class ClaudeConfigSwitcher:
         self.selected_config = None
 
     def create_config_button(self, config_file, settings_content):
-        frame = ctk.CTkFrame(
+        # Card container with modern styling
+        card = ctk.CTkFrame(
             self.config_listbox,
-            height=33,
+            height=24,
             corner_radius=0,
             fg_color=COLORS["bg_tertiary"],
+            border_width=1,
             border_color=COLORS["border"]
         )
-        frame.pack(fill="x", pady=(0, 1), padx=0)
-        frame.pack_propagate(False)
+        card.pack(fill="x", pady=(0, 1), padx=0)
+        card.pack_propagate(False)
 
+        # Main content frame
+        content_frame = ctk.CTkFrame(card, fg_color="transparent")
+        content_frame.pack(fill="both", expand=True, padx=8, pady=4)
+
+        # File name with compact typography
         name_label = ctk.CTkLabel(
-            frame,
+            content_frame,
             text=config_file.name,
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=12, weight="bold"),
             anchor="w",
             text_color=COLORS["text_primary"]
         )
-        name_label.pack(side="left", padx=10, pady=5, fill="x", expand=True)
+        name_label.pack(side="left", fill="x", expand=True, anchor="w")
 
-        # Add status label (Active or Synced)
+        # Status indicator with modern styling
         is_active = config_file.name == "settings.json"
         is_synced = False
 
@@ -206,27 +236,46 @@ class ClaudeConfigSwitcher:
                 if current_content == settings_content:
                     is_synced = True
             except (json.JSONDecodeError, IOError):
-                pass  # Ignore files that can't be compared
+                pass
 
         if is_active:
             status_label = ctk.CTkLabel(
-                frame,
-                text="● Active",
-                font=ctk.CTkFont(size=12, weight="bold"),
+                content_frame,
+                text="●",
+                font=ctk.CTkFont(size=14, weight="bold"),
                 text_color=COLORS["accent_red"]
             )
-            status_label.pack(side="right", padx=10)
+            status_label.pack(side="right", padx=(6, 0))
         elif is_synced:
             status_label = ctk.CTkLabel(
-                frame,
+                content_frame,
                 text="●",
-                font=ctk.CTkFont(size=12),
-                text_color=COLORS["text_muted"]
+                font=ctk.CTkFont(size=14, weight="bold"),
+                text_color=COLORS["success_green"]
             )
-            status_label.pack(side="right", padx=10)
+            status_label.pack(side="right", padx=(6, 0))
 
-        frame.bind("<Button-1>", lambda e, f=config_file: self.select_config(f))
-        name_label.bind("<Button-1>", lambda e, f=config_file: self.select_config(f))
+        # Add hover effect data
+        card._config_file = config_file
+        card._is_selected = False
+        
+        # Bind click events
+        def on_click(e):
+            self.select_config(config_file)
+        
+        def on_enter(e):
+            if not card._is_selected:
+                card.configure(fg_color=COLORS["card_hover"])
+        
+        def on_leave(e):
+            if not card._is_selected:
+                card.configure(fg_color=COLORS["bg_tertiary"])
+        
+        card.bind("<Button-1>", on_click)
+        card.bind("<Enter>", on_enter)
+        card.bind("<Leave>", on_leave)
+        content_frame.bind("<Button-1>", on_click)
+        name_label.bind("<Button-1>", on_click)
 
     def select_config(self, config_file):
         self.selected_config = config_file
@@ -236,26 +285,27 @@ class ClaudeConfigSwitcher:
 
         # Update UI selection highlight
         for child in self.config_listbox.winfo_children():
-            # Find the label within the frame to get the file name
-            label_widget = child.winfo_children()[0]
-            if isinstance(label_widget, ctk.CTkLabel) and label_widget.cget("text") == config_file.name:
-                child.configure(fg_color=COLORS["accent_red"])
-                # Update status label color for visibility on red background
-                if len(child.winfo_children()) > 1:
-                    status_widget = child.winfo_children()[1]
-                    if isinstance(status_widget, ctk.CTkLabel):
-                        status_widget.configure(text_color=COLORS["text_primary"])
-            else:
-                child.configure(fg_color=COLORS["bg_tertiary"])
-                # Restore original status label colors
-                if len(child.winfo_children()) > 1:
-                    status_widget = child.winfo_children()[1]
-                    if isinstance(status_widget, ctk.CTkLabel):
-                        status_text = status_widget.cget("text")
-                        if "Active" in status_text:
-                            status_widget.configure(text_color=COLORS["accent_red"])
-                        else:
-                            status_widget.configure(text_color=COLORS["text_muted"])
+            if hasattr(child, '_config_file'):
+                if child._config_file.name == config_file.name:
+                    # Selected card
+                    child.configure(fg_color=COLORS["accent_primary"])
+                    child._is_selected = True
+                    # Update text color for better contrast on blue background
+                    for widget in child.winfo_children():
+                        if isinstance(widget, ctk.CTkFrame):  # content_frame
+                            for label in widget.winfo_children():
+                                if isinstance(label, ctk.CTkLabel) and "settings" in label.cget("text"):
+                                    label.configure(text_color="white")
+                else:
+                    # Unselected cards
+                    child.configure(fg_color=COLORS["bg_tertiary"])
+                    child._is_selected = False
+                    # Restore original text color
+                    for widget in child.winfo_children():
+                        if isinstance(widget, ctk.CTkFrame):  # content_frame
+                            for label in widget.winfo_children():
+                                if isinstance(label, ctk.CTkLabel) and "settings" in label.cget("text"):
+                                    label.configure(text_color=COLORS["text_primary"])
 
         self.update_preview(config_file)
 
