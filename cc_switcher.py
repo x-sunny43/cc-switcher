@@ -19,7 +19,9 @@ COLORS = {
     "text_muted": "#999999",      # Understated gray - muted text
     "accent_red": "#e74c3c",      # Classic warm red - active/important
     "accent_red_hover": "#c0392b", # Deep red - hover state
-    "success_green": "#27ae60"     # Balanced green - success status
+    "success_green": "#27ae60",   # Balanced green - success status
+    "button_bg": "#4a4a4a",       # Button background - lighter than tertiary
+    "button_hover": "#5a5a5a"     # Button hover - even lighter
 }
 
 
@@ -100,7 +102,7 @@ class ClaudeConfigSwitcher:
             height=30,
             font=ctk.CTkFont(size=14, weight="bold"),
             corner_radius=0,
-            fg_color=COLORS["bg_tertiary"],
+            fg_color=COLORS["button_bg"],
             hover_color=COLORS["accent_red"],
             text_color=COLORS["text_primary"]
         )
@@ -112,8 +114,8 @@ class ClaudeConfigSwitcher:
             command=self.refresh_config_list,
             height=30,
             corner_radius=0,
-            fg_color=COLORS["bg_tertiary"],
-            hover_color=COLORS["accent_red_hover"],
+            fg_color=COLORS["button_bg"],
+            hover_color=COLORS["button_hover"],
             text_color=COLORS["text_primary"]
         )
         self.refresh_btn.pack(pady=2, padx=0, fill="x")
@@ -124,8 +126,8 @@ class ClaudeConfigSwitcher:
             command=self.open_config_directory,
             height=30,
             corner_radius=0,
-            fg_color=COLORS["bg_tertiary"],
-            hover_color=COLORS["accent_red_hover"],
+            fg_color=COLORS["button_bg"],
+            hover_color=COLORS["button_hover"],
             text_color=COLORS["text_primary"]
         )
         self.open_dir_btn.pack(pady=(2, 0), padx=0, fill="x")
