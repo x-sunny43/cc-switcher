@@ -1,0 +1,20 @@
+[project]
+name = "claude-test"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "customtkinter>=5.2.2",
+    "pyinstaller>=6.14.2",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"  # "off", "basic", "standard", "strict"
+pythonVersion = "3.11"
+pythonPlatform = "Windows"  # "Windows", "Darwin", "All",  "Linux"
+extraPaths = ["./venv/Lib/site-packages"]
+venvPath = "."
+venv = ".venv"
+exclude = ["**/__pycache__", "build", "dist"]
+ignore = ["temp"]
