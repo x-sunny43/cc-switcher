@@ -215,8 +215,22 @@ class ClaudeConfigSwitcher:
             label_widget = child.winfo_children()[0]
             if isinstance(label_widget, ctk.CTkLabel) and label_widget.cget("text") == config_file.name:
                 child.configure(fg_color=COLORS["accent_red"])
+                # Update status label color for visibility on red background
+                if len(child.winfo_children()) > 1:
+                    status_widget = child.winfo_children()[1]
+                    if isinstance(status_widget, ctk.CTkLabel):
+                        status_widget.configure(text_color=COLORS["text_primary"])
             else:
                 child.configure(fg_color=COLORS["bg_tertiary"])
+                # Restore original status label colors
+                if len(child.winfo_children()) > 1:
+                    status_widget = child.winfo_children()[1]
+                    if isinstance(status_widget, ctk.CTkLabel):
+                        status_text = status_widget.cget("text")
+                        if "Active" in status_text:
+                            status_widget.configure(text_color=COLORS["accent_red"])
+                        else:
+                            status_widget.configure(text_color=COLORS["text_muted"])
 
         self.update_preview(config_file)
 
