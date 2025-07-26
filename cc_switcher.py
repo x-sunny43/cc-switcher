@@ -59,6 +59,7 @@ class ClaudeConfigSwitcher:
         self.claude_dir = Path.home() / ".claude"
         self.settings_file = self.claude_dir / "settings.json"
         self.backup_dir = self.claude_dir / "backups"
+        self.app_state_file = self.claude_dir / "cc_switcher_state.json"
 
         self.config_files = []
         self.current_config = None
@@ -67,7 +68,28 @@ class ClaudeConfigSwitcher:
         self.setup_ui()
         
         # Use after_idle to ensure UI is ready before refreshing
-        self.root.after_idle(self.refresh_config_list)
+        self.root.after_idle(lambda: self.refresh_config_list(is_initial=True))
+
+    def load_app_state(self):
+        """Load the last selected file from app state"""
+        try:
+            if self.app_state_file.exists():
+                with open(self.app_state_file, 'r', encoding='utf-8') as f:
+                    state = json.load(f)
+                    return state.get('last_selected_file')
+        except (json.JSONDecodeError, IOError):
+            pass
+        return None
+
+    def save_app_state(self, selected_file_name):
+        """Save the current selected file to app state"""
+        try:
+            self.claude_dir.mkdir(exist_ok=True)
+            state = {'last_selected_file': selected_file_name}
+            with open(self.app_state_file, 'w', encoding='utf-8') as f:
+                json.dump(state, f, indent=2)
+        except (IOError, OSError):
+            pass  # Silently ignore save failures
 
 
     def setup_ui(self):
@@ -208,6 +230,9 @@ class ClaudeConfigSwitcher:
 
     def select_config(self, config_file):
         self.selected_config = config_file
+        
+        # Save the selected file to app state
+        self.save_app_state(config_file.name)
 
         # Update UI selection highlight
         for child in self.config_listbox.winfo_children():
@@ -293,10 +318,10 @@ class ClaudeConfigSwitcher:
         # Clear the message after 4 seconds
         self.root.after(4000, lambda: self.status_label.configure(text=""))
 
-    def refresh_config_list(self):
+    def refresh_config_list(self, is_initial=False):
         try:
-            # Remember current selection
-            current_selection = self.selected_config
+            # Remember current selection (only for non-initial refresh)
+            current_selection = self.selected_config if not is_initial else None
             
             # Clear existing list
             for widget in self.config_listbox.winfo_children():
@@ -337,13 +362,33 @@ class ClaudeConfigSwitcher:
             for config_file in self.config_files:
                 self.create_config_button(config_file, settings_content)
 
-            # Restore selection if the file still exists, otherwise keep no selection
-            if current_selection and current_selection.exists():
-                # Find the corresponding file in the new list
-                for config_file in self.config_files:
-                    if config_file.name == current_selection.name:
-                        self.select_config(config_file)
-                        break
+            if is_initial:
+                # Initial load: Restore last selection or default to settings.json
+                last_selected = self.load_app_state()
+                target_file = None
+                
+                # Try to find the last selected file
+                if last_selected:
+                    for config_file in self.config_files:
+                        if config_file.name == last_selected:
+                            target_file = config_file
+                            break
+                
+                # If no last selection or file not found, default to settings.json
+                if not target_file and settings_file_path:
+                    target_file = settings_file_path
+                
+                # Select the target file if found
+                if target_file:
+                    self.select_config(target_file)
+            else:
+                # Regular refresh: Restore selection if the file still exists
+                if current_selection and current_selection.exists():
+                    # Find the corresponding file in the new list
+                    for config_file in self.config_files:
+                        if config_file.name == current_selection.name:
+                            self.select_config(config_file)
+                            break
                 
         except Exception as e:
             self.update_status(f"Error loading configs: {str(e)}", COLORS["accent_red"])
