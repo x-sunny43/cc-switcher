@@ -59,7 +59,7 @@ class ClaudeConfigSwitcher:
         self.claude_dir = Path.home() / ".claude"
         self.settings_file = self.claude_dir / "settings.json"
         self.backup_dir = self.claude_dir / "backups"
-        self.app_state_file = self.claude_dir / "cc_switcher_state.json"
+        self.app_state_file = self.claude_dir / ".cc-cache"
 
         self.config_files = []
         self.current_config = None
