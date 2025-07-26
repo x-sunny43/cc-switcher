@@ -1,18 +1,19 @@
 @echo off
+chcp 65001 >nul
 echo ========================================
-echo Claude Config Switcher 快速打包工具
+echo Claude Config Switcher Build Tool
 echo ========================================
 
-echo 正在运行打包脚本...
+echo Running build script...
 python build_exe.py
 
 if %ERRORLEVEL% EQU 0 (
     echo.
-    echo 打包完成！
-    echo 可执行文件位于 dist 目录中
+    echo Build completed successfully!
+    echo Executable file is in the dist directory
     pause
 ) else (
     echo.
-    echo 打包过程中出现错误
+    echo Build process encountered an error
     pause
 )

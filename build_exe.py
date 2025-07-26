@@ -162,12 +162,10 @@ def main():
     print("\n" + "=" * 30)
     success = build_exe()
 
-    # 询问是否清理构建文件
+    # 打包成功后自动清理构建文件
     if success:
         print("\n" + "=" * 30)
-        answer = input("是否清理构建文件? (y/n): ").lower().strip()
-        if answer in ['y', 'yes']:
-            clean_build_files()
+        clean_build_files()
 
     print("\n完成!")
     return 0 if success else 1
