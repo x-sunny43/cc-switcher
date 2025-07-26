@@ -71,7 +71,7 @@ class ClaudeConfigSwitcher:
     def setup_ui(self):
         # --- Main Content Area ---
         content_frame = ctk.CTkFrame(self.root, fg_color="transparent")
-        content_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        content_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
         # --- Left Panel ---
         self.left_panel = ctk.CTkFrame(content_frame, width=240, corner_radius=0, fg_color=COLORS["bg_secondary"])
@@ -80,7 +80,7 @@ class ClaudeConfigSwitcher:
 
         # --- Bottom Controls Container ---
         bottom_container = ctk.CTkFrame(self.left_panel, fg_color="transparent")
-        bottom_container.pack(side="bottom", fill="x", padx=0, pady=(5, 5))
+        bottom_container.pack(side="bottom", fill="x", padx=0, pady=(5, 0))
 
         # --- Status Label ---
         self.status_label = ctk.CTkLabel(
@@ -128,7 +128,7 @@ class ClaudeConfigSwitcher:
             hover_color=COLORS["accent_red_hover"],
             text_color=COLORS["text_primary"]
         )
-        self.open_dir_btn.pack(pady=2, padx=0, fill="x")
+        self.open_dir_btn.pack(pady=(2, 0), padx=0, fill="x")
 
         # --- Config List (takes all remaining space) ---
         self.config_listbox = ctk.CTkFrame(self.left_panel, corner_radius=0, fg_color="transparent")
@@ -136,7 +136,7 @@ class ClaudeConfigSwitcher:
 
         # --- Right Panel (Preview) ---
         self.right_panel = ctk.CTkFrame(content_frame, corner_radius=0, fg_color=COLORS["bg_secondary"])
-        self.right_panel.pack(side="left", fill="both", expand=True, padx=5, pady=0)
+        self.right_panel.pack(side="left", fill="both", expand=True, padx=(5, 0), pady=0)
 
         self.preview_textbox = ctk.CTkTextbox(
             self.right_panel,
