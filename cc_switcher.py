@@ -99,6 +99,26 @@ class ClaudeConfigSwitcher:
         toolbar_container = ctk.CTkFrame(self.toolbar, fg_color="transparent")
         toolbar_container.pack(fill="both", expand=True, padx=2, pady=8)
 
+        # Top button container for sync button
+        top_container = ctk.CTkFrame(toolbar_container, fg_color="transparent")
+        top_container.pack(side="top")
+
+        # WebDAV sync button (sun behind cloud icon) - at the very top
+        self.sync_btn = ctk.CTkButton(
+            top_container,
+            text="🌥",
+            command=self.webdav_sync,
+            width=26,
+            height=26,
+            corner_radius=0,
+            fg_color="transparent",
+            hover_color=COLORS["card_hover"],
+            text_color=COLORS["text_primary"],
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            border_width=0
+        )
+        self.sync_btn.pack(pady=(0, 8))
+
         # Bottom button container to push buttons to bottom
         button_container = ctk.CTkFrame(toolbar_container, fg_color="transparent")
         button_container.pack(side="bottom")
@@ -605,6 +625,10 @@ class ClaudeConfigSwitcher:
             ctk.set_appearance_mode("dark")
             self.theme_btn.configure(text="🌙")
             self.update_status("Switched to dark theme", COLORS["success_green"])
+
+    def webdav_sync(self):
+        """WebDAV synchronization functionality"""
+        self.update_status("WebDAV sync feature coming soon", COLORS["text_muted"])
 
 
 def main():
