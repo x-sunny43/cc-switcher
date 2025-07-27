@@ -8,14 +8,14 @@ from datetime import datetime
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
-# Modern card-style color scheme
-COLORS = {
+# Modern card-style color schemes
+DARK_COLORS = {
     "bg_primary": "#1a1a1a",      # Dark background
     "bg_secondary": "#2b2b2b",    # Card background
     "bg_tertiary": "#333333",     # Elevated card background
     "card_hover": "#3a3a3a",      # Card hover state
-    "border": "#404040",  # Subtle border
-    "shadow": "#000000",   # Card shadow
+    "border": "#404040",          # Subtle border
+    "shadow": "#000000",          # Card shadow
     "text_primary": "#ffffff",    # Primary text
     "text_secondary": "#b3b3b3",  # Secondary text
     "text_muted": "#666666",      # Muted text
@@ -26,6 +26,27 @@ COLORS = {
     "success_green": "#4caf50",   # Success state
     "warning_orange": "#ff9800"   # Warning state
 }
+
+LIGHT_COLORS = {
+    "bg_primary": "#f8f8f6",      # Warm, eye-friendly background
+    "bg_secondary": "#fefffe",    # Soft white with warm undertone
+    "bg_tertiary": "#f3f4f2",     # Elevated background with subtle contrast
+    "card_hover": "#eef1ee",      # Gentle hover effect
+    "border": "#d0d7de",          # Professional border color
+    "shadow": "#eaeef2",          # Soft shadow color
+    "text_primary": "#24292f",    # High contrast primary text
+    "text_secondary": "#57606a",  # Well-balanced secondary text
+    "text_muted": "#8c959f",      # Properly muted text
+    "accent_primary": "#0969da",  # Modern, accessible blue
+    "accent_hover": "#0860ca",    # Corresponding hover state
+    "accent_red": "#d1242f",      # Professional red for errors/active
+    "accent_red_hover": "#cf222e", # Corresponding hover state
+    "success_green": "#1a7f37",   # Professional success green
+    "warning_orange": "#d97916"   # Balanced warning orange
+}
+
+# Default to dark theme
+COLORS = DARK_COLORS
 
 
 class ClaudeConfigSwitcher:
@@ -394,22 +415,8 @@ class ClaudeConfigSwitcher:
         """Insert JSON content with syntax highlighting"""
         import re
         
-        # Define color scheme for JSON syntax highlighting
-        colors = {
-            "string": "#ce9178",      # Orange for strings
-            "number": "#b5cea8",      # Light green for numbers
-            "boolean": "#569cd6",     # Blue for booleans
-            "null": "#569cd6",        # Blue for null
-            "key": "#9cdcfe",         # Light blue for keys
-            "brace": "#ffd700",       # Gold for braces
-            "bracket": "#ffd700",     # Gold for brackets
-            "colon": "#ffffff",       # White for colons
-            "comma": "#ffffff"        # White for commas
-        }
-        
-        # Configure text tags for highlighting
-        for tag, color in colors.items():
-            self.preview_textbox.tag_config(tag, foreground=color)
+        # Define color scheme for JSON syntax highlighting based on current theme
+        self.update_json_highlighting_colors()
         
         # Insert the content
         self.preview_textbox.insert("1.0", json_content)
@@ -616,15 +623,103 @@ class ClaudeConfigSwitcher:
 
     def toggle_theme(self):
         """Toggle between light and dark theme"""
+        global COLORS
         current_mode = ctk.get_appearance_mode()
         if current_mode == "Dark":
             ctk.set_appearance_mode("light")
+            COLORS = LIGHT_COLORS
             self.theme_btn.configure(text="☀")
             self.update_status("Switched to light theme", COLORS["success_green"])
         else:
             ctk.set_appearance_mode("dark")
+            COLORS = DARK_COLORS
             self.theme_btn.configure(text="🌙")
             self.update_status("Switched to dark theme", COLORS["success_green"])
+        
+        # Refresh the UI with new colors
+        self.apply_theme_colors()
+
+    def apply_theme_colors(self):
+        """Apply current theme colors to all UI components"""
+        # Update main window
+        self.root.configure(fg_color=COLORS["bg_primary"])
+        
+        # Update toolbar
+        self.toolbar.configure(fg_color=COLORS["bg_secondary"])
+        
+        # Update toolbar buttons
+        toolbar_buttons = [self.sync_btn, self.theme_btn, self.settings_btn]
+        for btn in toolbar_buttons:
+            btn.configure(
+                hover_color=COLORS["card_hover"],
+                text_color=COLORS["text_primary"]
+            )
+        
+        # Update left panel
+        self.left_panel.configure(fg_color=COLORS["bg_secondary"])
+        
+        # Update status label
+        self.status_label.configure(text_color=COLORS["text_muted"])
+        
+        # Update action buttons
+        action_buttons = [self.switch_btn, self.refresh_btn, self.open_dir_btn]
+        for btn in action_buttons:
+            btn.configure(
+                fg_color=COLORS["bg_tertiary"],
+                hover_color=COLORS["card_hover"],
+                text_color=COLORS["text_primary"],
+                border_color=COLORS["border"]
+            )
+        
+        # Update right panel
+        self.right_panel.configure(fg_color=COLORS["bg_secondary"])
+        
+        # Update preview textbox
+        self.preview_textbox.configure(
+            fg_color=COLORS["bg_tertiary"],
+            text_color=COLORS["text_primary"],
+            border_color=COLORS["border"]
+        )
+        
+        # Update JSON syntax highlighting colors for current theme
+        if hasattr(self, 'preview_textbox'):
+            self.update_json_highlighting_colors()
+        
+        # Refresh config list to apply new colors
+        self.refresh_config_list()
+
+    def update_json_highlighting_colors(self):
+        """Update JSON syntax highlighting colors based on current theme"""
+        if ctk.get_appearance_mode() == "Light":
+            # Light theme colors
+            colors = {
+                "string": "#d14",         # Red for strings
+                "number": "#099",         # Teal for numbers  
+                "boolean": "#0086b3",     # Blue for booleans
+                "null": "#0086b3",        # Blue for null
+                "key": "#0086b3",         # Blue for keys
+                "brace": "#333",          # Dark gray for braces
+                "bracket": "#333",        # Dark gray for brackets
+                "colon": "#333",          # Dark gray for colons
+                "comma": "#333"           # Dark gray for commas
+            }
+        else:
+            # Dark theme colors (original)
+            colors = {
+                "string": "#ce9178",      # Orange for strings
+                "number": "#b5cea8",      # Light green for numbers
+                "boolean": "#569cd6",     # Blue for booleans
+                "null": "#569cd6",        # Blue for null
+                "key": "#9cdcfe",         # Light blue for keys
+                "brace": "#ffd700",       # Gold for braces
+                "bracket": "#ffd700",     # Gold for brackets
+                "colon": "#ffffff",       # White for colons
+                "comma": "#ffffff"        # White for commas
+            }
+        
+        # Configure text tags for highlighting
+        for tag, color in colors.items():
+            self.preview_textbox.tag_config(tag, foreground=color)
 
     def webdav_sync(self):
         """WebDAV synchronization functionality"""
