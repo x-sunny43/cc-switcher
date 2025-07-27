@@ -39,25 +39,16 @@ class ClaudeConfigSwitcher:
         self.root.resizable(True, True)
         
         # Set initial size
-        window_width = 860
-        window_height = 430  # Reduced since we removed custom title bar
+        window_width = 900
+        window_height = 430
 
         # Get screen dimensions and center the window
-        # Update to get actual screen dimensions after window creation
         self.root.update_idletasks()
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         center_x = int((screen_width - window_width) // 2)
         center_y = int((screen_height - window_height) // 2)
         self.root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-
-        # Try to minimize system decorations while keeping taskbar functionality
-        try:
-            # These attributes help on different platforms
-            self.root.attributes('-alpha', 1.0)  # Ensure full opacity
-        except Exception:
-            pass
-
 
         self.claude_dir = Path.home() / ".claude"
         self.settings_file = self.claude_dir / "settings.json"
@@ -94,15 +85,59 @@ class ClaudeConfigSwitcher:
         except (IOError, OSError):
             pass  # Silently ignore save failures
 
-
     def setup_ui(self):
         # --- Main Content Area ---
         content_frame = ctk.CTkFrame(self.root, fg_color="transparent")
         content_frame.pack(fill="both", expand=True, padx=3, pady=3)
 
+        # --- Toolbar (leftmost panel) ---
+        self.toolbar = ctk.CTkFrame(content_frame, width=30, corner_radius=0, fg_color=COLORS["bg_secondary"])
+        self.toolbar.pack(side="left", fill="y", pady=0, padx=(0, 0.5))
+        self.toolbar.pack_propagate(False)
+
+        # --- Toolbar Content ---
+        toolbar_container = ctk.CTkFrame(self.toolbar, fg_color="transparent")
+        toolbar_container.pack(fill="both", expand=True, padx=2, pady=8)
+
+        # Bottom button container to push buttons to bottom
+        button_container = ctk.CTkFrame(toolbar_container, fg_color="transparent")
+        button_container.pack(side="bottom")
+
+        # Settings button (gear icon) - at the very bottom
+        self.settings_btn = ctk.CTkButton(
+            button_container,
+            text="⚙",
+            command=self.open_settings,
+            width=26,
+            height=26,
+            corner_radius=0,
+            fg_color="transparent",
+            hover_color=COLORS["card_hover"],
+            text_color=COLORS["text_primary"],
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            border_width=0
+        )
+        self.settings_btn.pack(side="bottom", pady=(4, 0))
+
+        # Theme toggle button (sun/moon icon) - above settings
+        self.theme_btn = ctk.CTkButton(
+            button_container,
+            text="🌙",
+            command=self.toggle_theme,
+            width=26,
+            height=26,
+            corner_radius=0,
+            fg_color="transparent",
+            hover_color=COLORS["card_hover"],
+            text_color=COLORS["text_primary"],
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            border_width=0
+        )
+        self.theme_btn.pack(side="bottom", pady=(0, 4))
+
         # --- Left Panel ---
         self.left_panel = ctk.CTkFrame(content_frame, width=260, corner_radius=0, fg_color=COLORS["bg_secondary"])
-        self.left_panel.pack(side="left", fill="y", pady=0, padx=(0, 1))
+        self.left_panel.pack(side="left", fill="y", pady=0, padx=(1, 1))
         self.left_panel.pack_propagate(False)
 
         # --- Bottom Controls Container ---
@@ -554,6 +589,22 @@ class ClaudeConfigSwitcher:
 
     def run(self):
         self.root.mainloop()
+
+    def open_settings(self):
+        """Open settings dialog or configuration"""
+        self.update_status("Settings feature coming soon", COLORS["text_muted"])
+
+    def toggle_theme(self):
+        """Toggle between light and dark theme"""
+        current_mode = ctk.get_appearance_mode()
+        if current_mode == "Dark":
+            ctk.set_appearance_mode("light")
+            self.theme_btn.configure(text="☀")
+            self.update_status("Switched to light theme", COLORS["success_green"])
+        else:
+            ctk.set_appearance_mode("dark")
+            self.theme_btn.configure(text="🌙")
+            self.update_status("Switched to dark theme", COLORS["success_green"])
 
 
 def main():
