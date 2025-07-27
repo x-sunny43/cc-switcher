@@ -102,7 +102,7 @@ class ClaudeConfigSwitcher:
 
         # --- Left Panel ---
         self.left_panel = ctk.CTkFrame(content_frame, width=260, corner_radius=0, fg_color=COLORS["bg_secondary"])
-        self.left_panel.pack(side="left", fill="y", pady=0, padx=(0, 2))
+        self.left_panel.pack(side="left", fill="y", pady=0, padx=(0, 1))
         self.left_panel.pack_propagate(False)
 
         # --- Bottom Controls Container ---
@@ -183,7 +183,7 @@ class ClaudeConfigSwitcher:
 
         # --- Right Panel (Preview) ---
         self.right_panel = ctk.CTkFrame(content_frame, corner_radius=0, fg_color=COLORS["bg_secondary"])
-        self.right_panel.pack(side="left", fill="both", expand=True, padx=(2, 0), pady=0)
+        self.right_panel.pack(side="left", fill="both", expand=True, padx=(1, 0), pady=0)
 
         # Preview content
         preview_container = ctk.CTkFrame(self.right_panel, fg_color="transparent")
