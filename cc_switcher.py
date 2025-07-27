@@ -79,28 +79,66 @@ class ClaudeConfigSwitcher:
         self.config_files = []
         self.current_config = None
 
+        # Initialize theme from saved state
+        self.init_theme()
+
         # Initialize UI after all variables are set
         self.setup_ui()
+        
+        # Apply theme colors after UI is created
+        if ctk.get_appearance_mode() == "Light":
+            self.apply_theme_colors()
         
         # Use after_idle to ensure UI is ready before refreshing
         self.root.after_idle(lambda: self.refresh_config_list(is_initial=True))
 
+    def init_theme(self):
+        """Initialize theme from saved state"""
+        global COLORS
+        app_state = self.load_app_state()
+        saved_theme = app_state.get('theme_mode', 'dark')
+        
+        if saved_theme == 'light':
+            ctk.set_appearance_mode("light")
+            COLORS = LIGHT_COLORS
+        else:
+            ctk.set_appearance_mode("dark")
+            COLORS = DARK_COLORS
+
     def load_app_state(self):
-        """Load the last selected file from app state"""
+        """Load the last selected file and theme from app state"""
         try:
             if self.app_state_file.exists():
                 with open(self.app_state_file, 'r', encoding='utf-8') as f:
                     state = json.load(f)
-                    return state.get('last_selected_file')
+                    return {
+                        'last_selected_file': state.get('last_selected_file'),
+                        'theme_mode': state.get('theme_mode', 'dark')
+                    }
         except (json.JSONDecodeError, IOError):
             pass
-        return None
+        return {'last_selected_file': None, 'theme_mode': 'dark'}
 
-    def save_app_state(self, selected_file_name):
-        """Save the current selected file to app state"""
+    def save_app_state(self, selected_file_name=None, theme_mode=None):
+        """Save the current selected file and theme to app state"""
         try:
             self.claude_dir.mkdir(exist_ok=True)
-            state = {'last_selected_file': selected_file_name}
+            
+            # Load existing state
+            state = {'last_selected_file': None, 'theme_mode': 'dark'}
+            if self.app_state_file.exists():
+                try:
+                    with open(self.app_state_file, 'r', encoding='utf-8') as f:
+                        state = json.load(f)
+                except (json.JSONDecodeError, IOError):
+                    pass
+            
+            # Update with new values if provided
+            if selected_file_name is not None:
+                state['last_selected_file'] = selected_file_name
+            if theme_mode is not None:
+                state['theme_mode'] = theme_mode
+                
             with open(self.app_state_file, 'w', encoding='utf-8') as f:
                 json.dump(state, f, indent=2)
         except (IOError, OSError):
@@ -161,9 +199,10 @@ class ClaudeConfigSwitcher:
         self.settings_btn.pack(side="bottom", pady=(4, 0))
 
         # Theme toggle button (sun/moon icon) - above settings
+        initial_theme_icon = "☀" if ctk.get_appearance_mode() == "Light" else "🌙"
         self.theme_btn = ctk.CTkButton(
             button_container,
-            text="🌙",
+            text=initial_theme_icon,
             command=self.toggle_theme,
             width=26,
             height=26,
@@ -366,7 +405,7 @@ class ClaudeConfigSwitcher:
         self.selected_config = config_file
         
         # Save the selected file to app state
-        self.save_app_state(config_file.name)
+        self.save_app_state(selected_file_name=config_file.name)
 
         # Update UI selection highlight
         for child in self.config_listbox.winfo_children():
@@ -585,7 +624,8 @@ class ClaudeConfigSwitcher:
 
             if is_initial:
                 # Initial load: Restore last selection or default to settings.json
-                last_selected = self.load_app_state()
+                app_state = self.load_app_state()
+                last_selected = app_state.get('last_selected_file')
                 target_file = None
                 
                 # Try to find the last selected file
@@ -629,11 +669,13 @@ class ClaudeConfigSwitcher:
             ctk.set_appearance_mode("light")
             COLORS = LIGHT_COLORS
             self.theme_btn.configure(text="☀")
+            self.save_app_state(theme_mode="light")
             self.update_status("Switched to light theme", COLORS["success_green"])
         else:
             ctk.set_appearance_mode("dark")
             COLORS = DARK_COLORS
             self.theme_btn.configure(text="🌙")
+            self.save_app_state(theme_mode="dark")
             self.update_status("Switched to dark theme", COLORS["success_green"])
         
         # Refresh the UI with new colors
