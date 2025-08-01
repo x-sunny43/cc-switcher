@@ -73,7 +73,6 @@ class ClaudeConfigSwitcher:
 
         self.claude_dir = Path.home() / ".claude"
         self.settings_file = self.claude_dir / "settings.json"
-        self.backup_dir = self.claude_dir / "backups"
         self.app_state_file = self.claude_dir / ".cc-cache"
 
         self.config_files = []
@@ -543,15 +542,7 @@ class ClaudeConfigSwitcher:
             return
 
         try:
-            # Backup is now implicit when switching
-            if self.settings_file.exists():
-                self.backup_dir.mkdir(exist_ok=True)
-                backup_name = f"settings_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-                backup_path = self.backup_dir / backup_name
-                shutil.copy2(self.settings_file, backup_path)
-
             shutil.copy2(self.selected_config, self.settings_file)
-
             self.update_status(f"Switched to {self.selected_config.name}", COLORS["success_green"])
             self.refresh_config_list()
 
